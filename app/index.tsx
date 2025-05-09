@@ -1,10 +1,10 @@
-import { Ionicons } from '@expo/vector-icons';
-import { useState } from 'react';
-import { StyleSheet, TextInput, TouchableOpacity } from 'react-native';
-
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { useThemeColor } from '@/hooks/useThemeColor';
+import { Ionicons } from '@expo/vector-icons';
+import { useState } from 'react';
+import { StyleSheet, TextInput, TouchableOpacity } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 interface Todo {
   id: string;
@@ -15,7 +15,7 @@ interface Todo {
 export default function HomeScreen() {
   const [todos, setTodos] = useState<Todo[]>([]);
   const [newTodo, setNewTodo] = useState('');
-  
+
   const textColor = useThemeColor({}, 'text');
   const backgroundColor = useThemeColor({}, 'background');
   const iconColor = useThemeColor({}, 'icon');
@@ -44,60 +44,62 @@ export default function HomeScreen() {
   };
 
   return (
-    <ThemedView style={styles.container}>
-      <ThemedText type="title" style={styles.title}>Todo List</ThemedText>
-      
-      <ThemedView style={styles.inputContainer}>
-        <TextInput
-          style={[
-            styles.input,
-            {
-              color: textColor,
-              borderColor: iconColor,
-              backgroundColor: backgroundColor,
-            },
-          ]}
-          value={newTodo}
-          onChangeText={setNewTodo}
-          placeholder="Add a new task..."
-          placeholderTextColor={iconColor}
-          onSubmitEditing={addTodo}
-        />
-        <TouchableOpacity style={styles.addButton} onPress={addTodo}>
-          <Ionicons name="add-circle" size={24} color={tintColor} />
-        </TouchableOpacity>
-      </ThemedView>
+      <ThemedView style={styles.container}>
+        <SafeAreaView style={styles.safe}>
+            <ThemedText type="title" style={styles.title}>Todo List</ThemedText>
 
-      <ThemedView style={styles.todoList}>
-        {todos.map((todo) => (
-          <TouchableOpacity
-            key={todo.id}
-            style={[
-              styles.todoItem,
-              {
-                backgroundColor: backgroundColor,
-                borderColor: iconColor,
-              },
-            ]}
-            onPress={() => toggleTodo(todo.id)}
-          >
-            <Ionicons
-              name={todo.completed ? 'checkmark-circle' : 'ellipse-outline'}
-              size={24}
-              color={todo.completed ? '#4CAF50' : iconColor}
-            />
-            <ThemedText
-              style={[
-                styles.todoText,
-                todo.completed && styles.completedTodo,
-                { color: todo.completed ? iconColor : textColor },
-              ]}
-            >
-              {todo.text}
-            </ThemedText>
-          </TouchableOpacity>
-        ))}
-      </ThemedView>
+            <ThemedView style={styles.inputContainer}>
+                <TextInput
+                style={[
+                    styles.input,
+                    {
+                    color: textColor,
+                    borderColor: iconColor,
+                    backgroundColor: backgroundColor,
+                    },
+                ]}
+                value={newTodo}
+                onChangeText={setNewTodo}
+                placeholder="Add a new task..."
+                placeholderTextColor={iconColor}
+                onSubmitEditing={addTodo}
+                />
+                <TouchableOpacity style={styles.addButton} onPress={addTodo}>
+                <Ionicons name="add-circle" size={24} color={tintColor} />
+                </TouchableOpacity>
+            </ThemedView>
+
+            <ThemedView style={styles.todoList}>
+                {todos.map((todo) => (
+                <TouchableOpacity
+                    key={todo.id}
+                    style={[
+                    styles.todoItem,
+                    {
+                        backgroundColor: backgroundColor,
+                        borderColor: iconColor,
+                    },
+                    ]}
+                    onPress={() => toggleTodo(todo.id)}
+                >
+                    <Ionicons
+                    name={todo.completed ? 'checkmark-circle' : 'ellipse-outline'}
+                    size={24}
+                    color={todo.completed ? '#4CAF50' : iconColor}
+                    />
+                    <ThemedText
+                    style={[
+                        styles.todoText,
+                        todo.completed && styles.completedTodo,
+                        { color: todo.completed ? iconColor : textColor },
+                    ]}
+                    >
+                    {todo.text}
+                    </ThemedText>
+                </TouchableOpacity>
+                ))}
+            </ThemedView>
+        </SafeAreaView>
     </ThemedView>
   );
 }
@@ -154,5 +156,8 @@ const styles = StyleSheet.create({
   },
   completedTodo: {
     textDecorationLine: 'line-through',
+  },
+  safe: {
+    flex: 1,
   },
 });
