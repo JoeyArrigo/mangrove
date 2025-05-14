@@ -3,8 +3,8 @@ import { ThemedView } from '@/components/ThemedView';
 import { useThemeColor } from '@/hooks/useThemeColor';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useState } from 'react';
-import { Animated, StyleSheet, TextInput, TouchableOpacity } from 'react-native';
+import { useRef, useState } from 'react';
+import { Animated, StyleSheet, Text, TextInput, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 interface Todo {
@@ -12,11 +12,30 @@ interface Todo {
   text: string;
   completed: boolean;
   animation?: Animated.Value;
+  color?: string;
+  emoji?: string;
 }
+
+const FUN_COLORS = [
+  '#FFB6C1', // Light Pink
+  '#FFD700', // Gold
+  '#87CEFA', // Light Sky Blue
+  '#98FB98', // Pale Green
+  '#FFA07A', // Light Salmon
+  '#FF69B4', // Hot Pink
+  '#FFDAB9', // Peach Puff
+  '#E0BBE4', // Lavender
+  '#FEE440', // Bright Yellow
+  '#00F2F8', // Aqua
+];
+const TODO_EMOJIS = ['🦄', '🌈', '🍭', '🎉', '✨', '🍕', '🍦', '🎈', '😺', '🚀'];
 
 export default function HomeScreen() {
   const [todos, setTodos] = useState<Todo[]>([]);
   const [newTodo, setNewTodo] = useState('');
+  const [inputFocused, setInputFocused] = useState(false);
+  const [shakeAnim] = useState(new Animated.Value(0));
+  const inputRef = useRef<TextInput>(null);
 
   const textColor = useThemeColor({}, 'text');
   const backgroundColor = useThemeColor({}, 'background');
@@ -31,9 +50,20 @@ export default function HomeScreen() {
           id: Date.now().toString(),
           text: newTodo.trim(),
           completed: false,
+          color: FUN_COLORS[Math.floor(Math.random() * FUN_COLORS.length)],
+          emoji: TODO_EMOJIS[Math.floor(Math.random() * TODO_EMOJIS.length)],
         },
       ]);
       setNewTodo('');
+    } else {
+      // Shake animation for empty input
+      Animated.sequence([
+        Animated.timing(shakeAnim, { toValue: 10, duration: 50, useNativeDriver: true }),
+        Animated.timing(shakeAnim, { toValue: -10, duration: 50, useNativeDriver: true }),
+        Animated.timing(shakeAnim, { toValue: 6, duration: 50, useNativeDriver: true }),
+        Animated.timing(shakeAnim, { toValue: -6, duration: 50, useNativeDriver: true }),
+        Animated.timing(shakeAnim, { toValue: 0, duration: 50, useNativeDriver: true }),
+      ]).start();
     }
   };
 
@@ -60,35 +90,37 @@ export default function HomeScreen() {
 
   return (
     <LinearGradient
-      colors={["#F5F7FA", "#E3E6ED"]}
+      colors={["#FFB6C1", "#FFD700", "#87CEFA", "#98FB98", "#FF69B4"]}
       style={{ flex: 1 }}
       start={{ x: 0, y: 0 }}
       end={{ x: 1, y: 1 }}
     >
       <ThemedView style={styles.container}>
         <SafeAreaView style={styles.safe}>
-          <ThemedText type="title" style={styles.title}>Todo List</ThemedText>
+          <ThemedText type="title" style={styles.title}>
+            Todo List <Text style={{ fontSize: 32 }}>🎈</Text>
+          </ThemedText>
 
-          <ThemedView style={styles.inputContainer}>
+          <Animated.View
+            style={[
+              styles.inputContainer,
+              inputFocused && styles.inputContainerFocused,
+              { transform: [{ translateX: shakeAnim }] },
+            ]}
+          >
             <TextInput
+              ref={inputRef}
               style={[
                 styles.input,
-                {
-                  color: textColor,
-                  borderColor: 'transparent',
-                  backgroundColor: '#fff',
-                  shadowColor: '#6366F1',
-                  shadowOpacity: 0.08,
-                  shadowRadius: 8,
-                  shadowOffset: { width: 0, height: 2 },
-                  elevation: 3,
-                },
+                inputFocused && styles.inputFocused,
               ]}
               value={newTodo}
               onChangeText={setNewTodo}
-              placeholder="Add a new task..."
+              placeholder="Add a fun new task..."
               placeholderTextColor="#A0AEC0"
               onSubmitEditing={addTodo}
+              onFocus={() => setInputFocused(true)}
+              onBlur={() => setInputFocused(false)}
             />
             <TouchableOpacity
               style={styles.addButton}
@@ -96,20 +128,20 @@ export default function HomeScreen() {
               activeOpacity={0.8}
             >
               <Animated.View style={styles.addButtonInner}>
-                <Ionicons name="add" size={28} color="#fff" />
+                <Ionicons name="add" size={32} color="#fff" style={{ transform: [{ rotate: inputFocused ? '90deg' : '0deg' }] }} />
               </Animated.View>
             </TouchableOpacity>
-          </ThemedView>
+          </Animated.View>
 
           <ThemedView style={styles.todoList}>
-            {todos.map((todo) => (
+            {todos.map((todo, idx) => (
               <Animated.View
                 key={todo.id}
                 style={[
                   styles.todoItem,
                   {
-                    backgroundColor: '#fff',
-                    borderColor: 'transparent',
+                    backgroundColor: todo.color,
+                    shadowColor: todo.color,
                     opacity: todo.animation || 1,
                     transform: [
                       {
@@ -119,11 +151,6 @@ export default function HomeScreen() {
                         }),
                       },
                     ],
-                    shadowColor: '#6366F1',
-                    shadowOpacity: 0.08,
-                    shadowRadius: 8,
-                    shadowOffset: { width: 0, height: 2 },
-                    elevation: 3,
                   },
                 ]}
               >
@@ -132,16 +159,18 @@ export default function HomeScreen() {
                   onPress={() => toggleTodo(todo.id)}
                   activeOpacity={0.7}
                 >
+                  <Text style={{ fontSize: 24, marginRight: 6 }}>{todo.emoji}</Text>
                   <Ionicons
                     name={todo.completed ? 'checkmark-circle' : 'ellipse-outline'}
-                    size={26}
-                    color={todo.completed ? '#6366F1' : iconColor}
+                    size={28}
+                    color={todo.completed ? '#fff' : '#22223B'}
+                    style={{ textShadowColor: '#fff', textShadowRadius: 4 }}
                   />
                   <ThemedText
                     style={[
                       styles.todoText,
                       todo.completed && styles.completedTodo,
-                      { color: todo.completed ? '#A0AEC0' : textColor },
+                      { color: todo.completed ? '#fff' : '#22223B', fontWeight: '700' },
                     ]}
                   >
                     {todo.text}
@@ -163,12 +192,16 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   title: {
-    fontSize: 36,
-    fontWeight: '800',
+    fontSize: 40,
+    fontWeight: '900',
     marginBottom: 28,
+    paddingTop: 28,
     textAlign: 'center',
     color: '#22223B',
-    letterSpacing: 0.5,
+    letterSpacing: 1,
+    fontFamily: 'System',
+    textShadowColor: '#fff',
+    textShadowRadius: 8,
   },
   inputContainer: {
     flexDirection: 'row',
@@ -176,31 +209,49 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: 'transparent',
   },
+  inputContainerFocused: {
+    shadowColor: '#FFD700',
+    shadowOpacity: 0.4,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 8,
+  },
   input: {
     flex: 1,
-    height: 52,
+    height: 56,
     borderWidth: 0,
-    borderRadius: 26,
-    paddingHorizontal: 20,
+    borderRadius: 28,
+    paddingHorizontal: 22,
     marginRight: 12,
-    fontSize: 17,
+    fontSize: 18,
     backgroundColor: '#fff',
+    fontWeight: '600',
+    letterSpacing: 0.2,
+    fontFamily: 'System',
+  },
+  inputFocused: {
+    borderColor: '#FFD700',
+    borderWidth: 2,
+    shadowColor: '#FFD700',
+    shadowOpacity: 0.3,
+    shadowRadius: 10,
+    elevation: 8,
   },
   addButton: {
-    borderRadius: 26,
+    borderRadius: 28,
     overflow: 'hidden',
     backgroundColor: 'transparent',
-    shadowColor: '#6366F1',
-    shadowOpacity: 0.18,
-    shadowRadius: 8,
+    shadowColor: '#FF69B4',
+    shadowOpacity: 0.25,
+    shadowRadius: 10,
     shadowOffset: { width: 0, height: 2 },
-    elevation: 4,
+    elevation: 6,
   },
   addButtonInner: {
-    backgroundColor: '#6366F1',
-    borderRadius: 26,
-    width: 52,
-    height: 52,
+    backgroundColor: '#FF69B4',
+    borderRadius: 28,
+    width: 56,
+    height: 56,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -211,22 +262,28 @@ const styles = StyleSheet.create({
   todoItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 18,
-    borderRadius: 18,
-    marginBottom: 14,
+    padding: 20,
+    borderRadius: 20,
+    marginBottom: 16,
     borderWidth: 0,
     backgroundColor: '#fff',
+    shadowOpacity: 0.18,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 5,
   },
   todoText: {
     marginLeft: 14,
-    fontSize: 17,
-    fontWeight: '500',
-    letterSpacing: 0.1,
+    fontSize: 18,
+    fontWeight: '700',
+    letterSpacing: 0.2,
+    fontFamily: 'System',
   },
   completedTodo: {
     textDecorationLine: 'line-through',
-    color: '#A0AEC0',
+    color: '#fff',
     fontWeight: '400',
+    opacity: 0.7,
   },
   safe: {
     flex: 1,
