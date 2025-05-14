@@ -2,6 +2,7 @@ import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { useThemeColor } from '@/hooks/useThemeColor';
 import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useState } from 'react';
 import { Animated, StyleSheet, TextInput, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -58,131 +59,174 @@ export default function HomeScreen() {
   };
 
   return (
-    <ThemedView style={styles.container}>
-      <SafeAreaView style={styles.safe}>
-        <ThemedText type="title" style={styles.title}>Todo List</ThemedText>
+    <LinearGradient
+      colors={["#F5F7FA", "#E3E6ED"]}
+      style={{ flex: 1 }}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 1, y: 1 }}
+    >
+      <ThemedView style={styles.container}>
+        <SafeAreaView style={styles.safe}>
+          <ThemedText type="title" style={styles.title}>Todo List</ThemedText>
 
-        <ThemedView style={styles.inputContainer}>
-          <TextInput
-            style={[
-              styles.input,
-              {
-                color: textColor,
-                borderColor: iconColor,
-                backgroundColor: backgroundColor,
-              },
-            ]}
-            value={newTodo}
-            onChangeText={setNewTodo}
-            placeholder="Add a new task..."
-            placeholderTextColor={iconColor}
-            onSubmitEditing={addTodo}
-          />
-          <TouchableOpacity style={styles.addButton} onPress={addTodo}>
-            <Ionicons name="add-circle" size={24} color={tintColor} />
-          </TouchableOpacity>
-        </ThemedView>
-
-        <ThemedView style={styles.todoList}>
-          {todos.map((todo) => (
-            <Animated.View
-              key={todo.id}
+          <ThemedView style={styles.inputContainer}>
+            <TextInput
               style={[
-                styles.todoItem,
+                styles.input,
                 {
-                  backgroundColor: backgroundColor,
-                  borderColor: iconColor,
-                  opacity: todo.animation || 1,
-                  transform: [
-                    {
-                      translateY: (todo.animation || new Animated.Value(1)).interpolate({
-                        inputRange: [0, 1],
-                        outputRange: [10, 0],
-                      }),
-                    },
-                  ],
+                  color: textColor,
+                  borderColor: 'transparent',
+                  backgroundColor: '#fff',
+                  shadowColor: '#6366F1',
+                  shadowOpacity: 0.08,
+                  shadowRadius: 8,
+                  shadowOffset: { width: 0, height: 2 },
+                  elevation: 3,
                 },
               ]}
+              value={newTodo}
+              onChangeText={setNewTodo}
+              placeholder="Add a new task..."
+              placeholderTextColor="#A0AEC0"
+              onSubmitEditing={addTodo}
+            />
+            <TouchableOpacity
+              style={styles.addButton}
+              onPress={addTodo}
+              activeOpacity={0.8}
             >
-              <TouchableOpacity
-                style={styles.todoContent}
-                onPress={() => toggleTodo(todo.id)}
+              <Animated.View style={styles.addButtonInner}>
+                <Ionicons name="add" size={28} color="#fff" />
+              </Animated.View>
+            </TouchableOpacity>
+          </ThemedView>
+
+          <ThemedView style={styles.todoList}>
+            {todos.map((todo) => (
+              <Animated.View
+                key={todo.id}
+                style={[
+                  styles.todoItem,
+                  {
+                    backgroundColor: '#fff',
+                    borderColor: 'transparent',
+                    opacity: todo.animation || 1,
+                    transform: [
+                      {
+                        translateY: (todo.animation || new Animated.Value(1)).interpolate({
+                          inputRange: [0, 1],
+                          outputRange: [10, 0],
+                        }),
+                      },
+                    ],
+                    shadowColor: '#6366F1',
+                    shadowOpacity: 0.08,
+                    shadowRadius: 8,
+                    shadowOffset: { width: 0, height: 2 },
+                    elevation: 3,
+                  },
+                ]}
               >
-                <Ionicons
-                  name={todo.completed ? 'checkmark-circle' : 'ellipse-outline'}
-                  size={24}
-                  color={todo.completed ? '#4CAF50' : iconColor}
-                />
-                <ThemedText
-                  style={[
-                    styles.todoText,
-                    todo.completed && styles.completedTodo,
-                    { color: todo.completed ? iconColor : textColor },
-                  ]}
+                <TouchableOpacity
+                  style={styles.todoContent}
+                  onPress={() => toggleTodo(todo.id)}
+                  activeOpacity={0.7}
                 >
-                  {todo.text}
-                </ThemedText>
-              </TouchableOpacity>
-            </Animated.View>
-          ))}
-        </ThemedView>
-      </SafeAreaView>
-    </ThemedView>
+                  <Ionicons
+                    name={todo.completed ? 'checkmark-circle' : 'ellipse-outline'}
+                    size={26}
+                    color={todo.completed ? '#6366F1' : iconColor}
+                  />
+                  <ThemedText
+                    style={[
+                      styles.todoText,
+                      todo.completed && styles.completedTodo,
+                      { color: todo.completed ? '#A0AEC0' : textColor },
+                    ]}
+                  >
+                    {todo.text}
+                  </ThemedText>
+                </TouchableOpacity>
+              </Animated.View>
+            ))}
+          </ThemedView>
+        </SafeAreaView>
+      </ThemedView>
+    </LinearGradient>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
+    padding: 24,
+    justifyContent: 'center',
   },
   title: {
-    fontSize: 32,
-    marginBottom: 20,
+    fontSize: 36,
+    fontWeight: '800',
+    marginBottom: 28,
     textAlign: 'center',
+    color: '#22223B',
+    letterSpacing: 0.5,
   },
   inputContainer: {
     flexDirection: 'row',
-    marginBottom: 20,
+    marginBottom: 28,
     alignItems: 'center',
+    backgroundColor: 'transparent',
   },
   input: {
     flex: 1,
-    height: 50,
-    borderWidth: 1,
-    borderRadius: 8,
-    paddingHorizontal: 15,
-    marginRight: 10,
-    fontSize: 16,
+    height: 52,
+    borderWidth: 0,
+    borderRadius: 26,
+    paddingHorizontal: 20,
+    marginRight: 12,
+    fontSize: 17,
+    backgroundColor: '#fff',
   },
   addButton: {
-    padding: 10,
+    borderRadius: 26,
+    overflow: 'hidden',
+    backgroundColor: 'transparent',
+    shadowColor: '#6366F1',
+    shadowOpacity: 0.18,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 4,
+  },
+  addButtonInner: {
+    backgroundColor: '#6366F1',
+    borderRadius: 26,
+    width: 52,
+    height: 52,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   todoList: {
     flex: 1,
+    marginTop: 8,
   },
   todoItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 15,
-    borderRadius: 8,
-    marginBottom: 10,
-    borderWidth: 1,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 1,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
+    padding: 18,
+    borderRadius: 18,
+    marginBottom: 14,
+    borderWidth: 0,
+    backgroundColor: '#fff',
   },
   todoText: {
-    marginLeft: 10,
-    fontSize: 16,
+    marginLeft: 14,
+    fontSize: 17,
+    fontWeight: '500',
+    letterSpacing: 0.1,
   },
   completedTodo: {
     textDecorationLine: 'line-through',
+    color: '#A0AEC0',
+    fontWeight: '400',
   },
   safe: {
     flex: 1,
