@@ -403,6 +403,7 @@ const styles = StyleSheet.create({
     opacity: 0.2,
   },
   title: {
+    paddingVertical: 4,
     fontSize: 28,
     color: '#ffffff',
     textShadowColor: '#000000',
